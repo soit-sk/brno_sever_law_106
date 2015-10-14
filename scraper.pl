@@ -39,11 +39,9 @@ print 'Page: '.$base_uri->as_string."\n";
 my $root = get_root($base_uri);
 
 # Look for items.
-my $act_year = (localtime)[5] + 1900;
-foreach my $year (2010 .. $act_year) {
-	print "Year: $year\n";
-	my $year_div = get_h3_content($year);
-	process_year_block($year, $year_div);
+my @tables = $root->find_by_tag_name('table');
+foreach my $table (@tables) {
+	process_year_block($table);
 }
 
 # Get database date from div.
@@ -64,41 +62,6 @@ sub get_db_date_div_hack {
 	remove_trailing(\$year);
 	my $time = timelocal(0, 0, 0, $day, $mon - 1, $year - 1900);
 	return strftime('%Y-%m-%d', localtime($time));
-}
-
-# Get content after h3 defined by title.
-sub get_h3_content {
-	my $title = shift;
-	my @a = $root->find_by_tag_name('a');
-	my $ret_a;
-	foreach my $a (@a) {
-		if ($a->as_text eq $title) {
-			$ret_a = $a;
-			last;
-		}
-	}
-	my @content = $ret_a->parent->parent->content_list;
-	my $num = 0;
-	foreach my $content (@content) {
-		if ($num == 1) {
-			return $content;
-		}
-		if (check_h3($content, $title)) {
-			$num = 1;
-		}
-	}
-	return;
-}
-
-# Check if is h3 with defined title.
-sub check_h3 {
-	my ($block, $title) = @_;
-	foreach my $a ($block->find_by_tag_name('a')) {
-		if ($a->as_text eq $title) {
-			return 1;
-		}
-	}
-	return 0;
 }
 
 # Get root of HTML::TreeBuilder object.
@@ -135,7 +98,7 @@ sub md5 {
 
 # Process year block.
 sub process_year_block {
-	my ($year, $year_div) = @_;
+	my ($year_div) = @_;
 	foreach my $tr ($year_div->find_by_tag_name('tr')) {
 		my @td = $tr->find_by_tag_name('td');
 		my $date = get_db_date_div_hack($td[0]->as_text);
