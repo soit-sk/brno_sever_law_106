@@ -96,7 +96,12 @@ sub process_year_block {
 		my @title_a = $td[1]->find_by_tag_name('a');
 		foreach my $title_a (@title_a) {
 			my $title = $title_a->as_text;
+
+			if (!$title) {
+				$title = $td[1]->as_text;
+			}
 			remove_trailing(\$title);
+
 			my $pdf_link = $base_uri->scheme.'://'.$base_uri->host.
 				$title_a->attr('href');
 
