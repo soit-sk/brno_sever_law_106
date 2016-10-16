@@ -47,19 +47,10 @@ foreach my $table (@tables) {
 # Get database date from div.
 sub get_db_date_div_hack {
 	my $date_div = shift;
-	my ($day, $mon, $year) = $date_div =~ m/^.*?(\d{2}).*?(\d{2}).*?(\d{4}).*?$/ms;
-	if (! defined $day) {
-		($day, $mon, $year) = $date_div =~ m/^.*?(\d{2}).*?(\d{1}).*?(\d{4}).*?$/ms;
-	}
-	if (! defined $day) {
-		($day, $mon, $year) = $date_div =~ m/^.*?(\d{1}).*?(\d{2}).*?(\d{4}).*?$/ms;
-	}
-	if (! defined $day) {
-		($day, $mon, $year) = $date_div =~ m/^.*?(\d{1}).*?(\d{1}).*?(\d{4}).*?$/ms;
-	}
-	remove_trailing(\$day);
-	remove_trailing(\$mon);
-	remove_trailing(\$year);
+	$date_div =~ s/\s*//g;
+
+	my ($day, $mon, $year) = $date_div =~ m/(\d\d?).(\d\d?).(\d{4})/ms;
+
 	my $time = timelocal(0, 0, 0, $day, $mon - 1, $year - 1900);
 	return strftime('%Y-%m-%d', localtime($time));
 }
